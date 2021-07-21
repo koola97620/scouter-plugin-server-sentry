@@ -14,6 +14,7 @@ public class SentryPlugin {
     Configure conf = Configure.getInstance();
 
     public SentryPlugin() {
+        // 스케줄링 추가
 
     }
 

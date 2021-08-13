@@ -1,6 +1,7 @@
 package scouter.plugin.server.sentry;
 
 import scouter.lang.pack.PerfCounterPack;
+import scouter.lang.pack.XLogPack;
 import scouter.lang.plugin.PluginConstants;
 import scouter.lang.plugin.annotation.ServerPlugin;
 import scouter.plugin.server.sentry.performance.ConfigurationConstants;
@@ -66,13 +67,13 @@ public class SentryPlugin {
 //        }
 //    }
 
-//    @ServerPlugin(PluginConstants.PLUGIN_SERVER_XLOG)
-//    public void xlog(XLogPack pack) {
-//        if (isPossibleCollectXlog()) {
-//            return;
-//        }
-//
-//    }
+    @ServerPlugin(PluginConstants.PLUGIN_SERVER_XLOG)
+    public void xlog(XLogPack pack) {
+        if (isPossibleCollectXlog()) {
+            return;
+        }
+
+    }
 
     //    @ServerPlugin(PluginConstants.PLUGIN_SERVER_PROFILE)
 //    public void profile(XLogProfilePack pack) {

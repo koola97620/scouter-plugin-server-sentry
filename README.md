@@ -10,10 +10,10 @@
   - gc 시간이 설정한 임계치보다 높아지면 센트리 메시지 전송
 - Active Service (Performance)
   - 동시에 사용중인 서비스 수가 설정한 임계치보다 높아지면 센트리 메시지 전송
-- Error Counting (Xlog) - 개발중
+- Error Counting (Xlog)
   - 설정한 시간내 에러가 몇개 이상 발생하면 센트리 메시지 전송 (ex: 10초에 100개)
 
-## 설정
+## scouter.conf 설정
 
 - ext_plugin_sentry_dsn=https://~~~~ : SentryDSN URL
 - ext_plugin_sentry_counter_enabled=true : 성능 메트릭 수집 여부 (true / false)
@@ -22,6 +22,8 @@
 - ext_plugin_gc_time_threshold=1000 : GC Time 임계점 (long)
 - ext_plugin_tps_threshold=8 : tps 임계점 (int)
 - ext_plugin_active_service_threshold=3 : 활성 서비스 개수 임계점 (int)
+- ext_plugin_error_time_range=10 : 에러 감지 범위 (int)
+- ext_plugin_error_count=50 : 에러 수 임계점 (int)
 
 ## Dependencies
 

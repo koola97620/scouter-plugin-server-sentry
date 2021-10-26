@@ -38,7 +38,7 @@ class XlogServiceTest {
         then(sender).should().send(captor.capture());
         RuntimeException result = captor.getValue();
 
-        assertThat(result.getMessage()).isEqualTo("[tomcat05: 4,tomcat04: 4,tomcat03: 2,tomcat07: 1]");
+        assertThat(result.getMessage().split("\n")[0]).isEqualTo("[tomcat05: 4,tomcat04: 4,tomcat03: 2,tomcat07: 1]");
     }
 
     @DisplayName("장애 아닐시 메시지 미전송")

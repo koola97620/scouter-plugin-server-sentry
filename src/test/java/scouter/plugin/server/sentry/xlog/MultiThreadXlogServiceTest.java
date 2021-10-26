@@ -34,6 +34,7 @@ public class MultiThreadXlogServiceTest {
         when(groupConf.getInt(ConfigurationConstants.ERROR_TIME_RANGE, null, 0)).thenReturn(errorTimeRange);
         long standardTime = System.currentTimeMillis();
 
+
         insertData(standardTime, errorTimeRange);
 
         XLogPack xlogPack = new XLogPack();
@@ -45,7 +46,7 @@ public class MultiThreadXlogServiceTest {
         then(sender).should().send(captor.capture());
         RuntimeException result = captor.getValue();
 
-        assertThat(result.getMessage()).isEqualTo("[tomcat3: 3,tomcat6: 3,tomcat2: 2,tomcat5: 2,tomcat1: 1,tomcat7: 1,tomcat4: 1]");
+        assertThat(result.getMessage().split("\n")[0]).isEqualTo("[tomcat3: 3,tomcat6: 3,tomcat2: 2,tomcat5: 2,tomcat1: 1,tomcat7: 1,tomcat4: 1]");
         assertThat(xlogService.getXlogErrorWindow().size()).isEqualTo(0);
     }
 
@@ -91,7 +92,7 @@ public class MultiThreadXlogServiceTest {
         then(sender).should().send(captor.capture());
         RuntimeException result = captor.getValue();
 
-        assertThat(result.getMessage()).isEqualTo("[tomcat3: 3,tomcat6: 3,tomcat2: 2,tomcat5: 2,tomcat1: 1,tomcat7: 1,tomcat4: 1]");
+        assertThat(result.getMessage().split("\n")[0]).isEqualTo("[tomcat3: 3,tomcat6: 3,tomcat2: 2,tomcat5: 2,tomcat1: 1,tomcat7: 1,tomcat4: 1]");
 
         for (int i = 1; i < 30; i++) {
             XLogPack log = new XLogPack();
@@ -117,53 +118,59 @@ public class MultiThreadXlogServiceTest {
 
     private void insertData(long standardTime, int errorTimeRange) {
         XlogErrorWindow xlogErrorWindow = xlogService.getXlogErrorWindow();
+        XlogErrorWindowHelper helper = new XlogErrorWindowHelper(xlogErrorWindow);
         ExecutorService executorService = Executors.newFixedThreadPool(4);
         executorService.execute(() -> {
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 2500, "tomcat1"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 3500, "tomcat2"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 4500, "tomcat1"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 7000, "tomcat1"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 2500, "tomcat1"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 3500, "tomcat2"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 4500, "tomcat1"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 7000, "tomcat1"), errorTimeRange);
         });
         executorService.execute(() -> {
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 2000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 4000, "tomcat2"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 5000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 6000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 6700, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 7000, "tomcat2"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 2000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 4000, "tomcat2"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 5000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 6000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 6700, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 7000, "tomcat2"), errorTimeRange);
 
         });
         executorService.execute(() -> {
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 1000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 3000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 4000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 5000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 8000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 8000, "tomcat2"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 8000, "tomcat6"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 1000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 3000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 4000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 5000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 8000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 8000, "tomcat2"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 8000, "tomcat6"), errorTimeRange);
         });
         executorService.execute(() -> {
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 1000, "tomcat4"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 2000, "tomcat4"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 3000, "tomcat4"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 5000, "tomcat4"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 10000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 9000, "tomcat4"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 1000, "tomcat4"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 2000, "tomcat4"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 3000, "tomcat4"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 5000, "tomcat4"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 10000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 9000, "tomcat4"), errorTimeRange);
         });
         executorService.execute(() -> {
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 2000, "tomcat1"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 3000, "tomcat4"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 4000, "tomcat6"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 5000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 6000, "tomcat4"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 9000, "tomcat3"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 9000, "tomcat5"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 10000, "tomcat5"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 2000, "tomcat1"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 3000, "tomcat4"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 4000, "tomcat6"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 5000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 6000, "tomcat4"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 9000, "tomcat3"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 9000, "tomcat5"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 10000, "tomcat5"), errorTimeRange);
         });
         executorService.execute(() -> {
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 7000, "tomcat6"), errorTimeRange);
-            xlogErrorWindow.registFailure(new XlogStub(standardTime + 9000, "tomcat6"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 9000, "tomcat6"), errorTimeRange);
+            helper.registFailure(new XlogStub(standardTime + 7000, "tomcat6"), errorTimeRange);
         });
+
+        executorService.shutdown();
+        while(!executorService.isTerminated()) {
+
+        }
     }
 
 }

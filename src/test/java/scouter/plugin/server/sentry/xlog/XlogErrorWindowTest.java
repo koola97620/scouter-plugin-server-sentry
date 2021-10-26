@@ -10,22 +10,24 @@ public class XlogErrorWindowTest {
 
     private long beforeTime;
     private XlogErrorWindow xlogErrorWindow;
+    private XlogErrorWindowHelper helper;
 
     @BeforeEach
     void setUp() {
         xlogErrorWindow = new XlogErrorWindow();
+        helper = new XlogErrorWindowHelper(xlogErrorWindow);
         beforeTime = System.currentTimeMillis();
-        xlogErrorWindow.regist(new XlogStub(beforeTime));
-        xlogErrorWindow.regist(new XlogStub(beforeTime + 1000));
-        xlogErrorWindow.regist(new XlogStub(beforeTime + 1000));
-        xlogErrorWindow.regist(new XlogStub(beforeTime + 1000));
-        xlogErrorWindow.regist(new XlogStub(beforeTime + 1000));
-        xlogErrorWindow.regist(new XlogStub(beforeTime + 2000));
-        xlogErrorWindow.regist(new XlogStub(beforeTime + 2000));
-        xlogErrorWindow.regist(new XlogStub(beforeTime + 2000));
-        xlogErrorWindow.regist(new XlogStub(beforeTime + 3000));
-        xlogErrorWindow.regist(new XlogStub(beforeTime + 3000));
-        xlogErrorWindow.regist(new XlogStub(beforeTime + 3000));
+        helper.registFailure(new XlogStub(beforeTime));
+        helper.registFailure(new XlogStub(beforeTime + 1000)); //2000
+        helper.registFailure(new XlogStub(beforeTime + 1000)); //2000
+        helper.registFailure(new XlogStub(beforeTime + 1000)); //2000
+        helper.registFailure(new XlogStub(beforeTime + 1000)); //2000
+        helper.registFailure(new XlogStub(beforeTime + 2000)); //3000
+        helper.registFailure(new XlogStub(beforeTime + 2000)); //3000
+        helper.registFailure(new XlogStub(beforeTime + 2000)); //3000
+        helper.registFailure(new XlogStub(beforeTime + 3000)); //4000
+        helper.registFailure(new XlogStub(beforeTime + 3000)); //4000
+        helper.registFailure(new XlogStub(beforeTime + 3000)); //4000
     }
 
     @AfterEach
@@ -38,9 +40,10 @@ public class XlogErrorWindowTest {
         int countTimeRange = 3;
         long current = beforeTime + 5000;  // 6000
 
-        xlogErrorWindow.registFailure(new XlogStub(current), countTimeRange);
+        //xlogErrorWindow.registFailure(new XlogStub(current), countTimeRange);
+        helper.registFailure(new XlogStub(current), countTimeRange);
 
-        assertThat(xlogErrorWindow.size()).isEqualTo(7);
+        assertThat(helper.size()).isEqualTo(7);
     }
 
     @Test
@@ -48,9 +51,9 @@ public class XlogErrorWindowTest {
         int countTimeRange = 3;
         int countThreshold = 5;
 
-        long current = beforeTime + 5000;
-        xlogErrorWindow.registFailure(new XlogStub(current), countTimeRange);
-        boolean result = xlogErrorWindow.isFailure(countThreshold);
+        long current = beforeTime + 5000;  // 6000
+        helper.registFailure(new XlogStub(current), countTimeRange);
+        boolean result = helper.isFailure(countThreshold);
 
         assertThat(result).isTrue();
     }
@@ -60,9 +63,9 @@ public class XlogErrorWindowTest {
         int countTimeRange = 3;
         int countThreshold = 10;
 
-        long current = beforeTime + 5000;
-        xlogErrorWindow.registFailure(new XlogStub(current), countTimeRange);
-        boolean result = xlogErrorWindow.isFailure(countThreshold);
+        long current = beforeTime + 5000;  // 6000
+        helper.registFailure(new XlogStub(current), countTimeRange);
+        boolean result = helper.isFailure(countThreshold);
 
         assertThat(result).isFalse();
     }

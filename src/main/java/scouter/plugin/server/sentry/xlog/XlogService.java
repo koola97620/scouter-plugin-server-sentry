@@ -7,6 +7,8 @@ import scouter.plugin.server.sentry.send.MessageSender;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -62,13 +64,20 @@ public class XlogService {
     }
 
     private String createErrorMessage(ConcurrentLinkedQueue<XlogData> xlogDataQueue) {
-        return xlogDataQueue.stream()
+        String countStr = xlogDataQueue.stream()
                 .collect(Collectors.groupingBy(XlogData::getObjName, Collectors.counting()))
                 .entrySet()
                 .stream()
                 .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining(",", "[", "]"));
+
+        String errorInfo = xlogDataQueue.stream()
+                .sorted(Comparator.comparingLong(XlogData::getTime))
+                .map(log -> log.getObjName() + ": " + new Timestamp(log.getTime()).toLocalDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")))
+                .collect(Collectors.joining("\n"));
+
+        return countStr + "\n" + errorInfo;
     }
 
 }
